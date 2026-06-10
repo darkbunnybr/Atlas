@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Volume — Performance Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root {
+  --gold: #D4A017;
+  --gold-light: #E8B82A;
+  --gold-dark: #A07810;
+  --bg: #111111;
+  --bg2: #1a1a1a;
+  --bg3: #222222;
+  --bg4: #2a2a2a;
+  --text: #f0f0ec;
+  --text2: #aaaaaa;
+  --text3: #666660;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(212,160,23,0.3);
+  --success-bg: #0a2e1e;
+  --success-text: #4ade80;
+  --warning-bg: #2e1e04;
+  --warning-text: #fbbf24;
+  --danger-bg: #2e0a0a;
+  --danger-text: #f87171;
+  --info-bg: #0a1a2e;
+  --info-text: #60a5fa;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --font-title: 'Bebas Neue', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gold);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 20px;
+  color: #111;
+  letter-spacing: 0;
+}
+.logo-text {
+  font-family: var(--font-title);
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1;
+}
+.logo-text span { color: var(--gold); }
+.header-sub {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--font-body);
+  letter-spacing: .04em;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  border-bottom: 1px solid var(--border2);
+  padding: 2.5rem 2rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 300px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.04));
+  pointer-events: none;
+}
+.hero-accent {
+  width: 3px;
+  height: 40px;
+  background: var(--gold);
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 12px;
+  border-radius: 2px;
+}
+.hero h1 {
+  font-family: var(--font-title);
+  font-size: 36px;
+  letter-spacing: 2px;
+  color: var(--text);
+  display: inline;
+  vertical-align: middle;
+}
+.hero h1 span { color: var(--gold); }
+.hero-desc {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 8px;
+  letter-spacing: .02em;
+  padding-left: 15px;
+}
+.hero-pills {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-left: 15px;
+  flex-wrap: wrap;
+}
+.pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  color: var(--gold);
+  background: rgba(212,160,23,0.06);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* CONTAINER */
+.container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* SECTION TITLE */
+.sec-title {
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.tab {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-pane { display: none; } .tab-pane.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+.card:hover { border-color: rgba(212,160,23,0.15); }
+.card label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--text3);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+
+/* FORM ELEMENTS */
+select, input[type=text], input[type=number] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+select:focus, input:focus { border-color: var(--border2); }
+input[type=range] {
+  width: 100%;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+.row { display: flex; align-items: center; gap: 8px; }
+.rval {
+  font-family: var(--font-title);
+  font-size: 16px;
+  color: var(--gold);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* SUMMARY */
+.sum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.sum-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+.sum-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--gold);
+  opacity: .4;
+}
+.sum-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.sum-val { font-family: var(--font-title); font-size: 28px; letter-spacing: 1px; color: var(--gold); }
+.sum-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* MUSCLE CARDS */
+.mcard {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.mcard:hover { border-color: rgba(212,160,23,0.15); }
+.mcard.junk { border-color: rgba(248,113,113,0.4); }
+.mhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.mname {
+  font-family: var(--font-title);
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+.badge { font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; }
+.bs { background: var(--success-bg); color: var(--success-text); }
+.bw { background: var(--warning-bg); color: var(--warning-text); }
+.bd { background: var(--danger-bg); color: var(--danger-text); }
+.bi { background: rgba(212,160,23,0.1); color: var(--gold); border: 1px solid rgba(212,160,23,0.2); }
+.mrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.mrow:last-of-type { border-bottom: none; }
+.ml { font-size: 11px; color: var(--text3); letter-spacing: .02em; }
+.mv { font-size: 12px; font-weight: 700; color: var(--text); }
+.bar-track { height: 6px; background: var(--bg3); border-radius: 999px; overflow: hidden; margin: 10px 0 4px; }
+.bar-fill { height: 100%; border-radius: 999px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+.bar-marks { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-bottom: 8px; }
+.jbox {
+  background: var(--danger-bg);
+  border: 1px solid rgba(248,113,113,0.2);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--danger-text);
+  margin-top: 6px;
+  display: none;
+}
+.jbox.on { display: flex; align-items: center; gap: 6px; }
+.freq-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.freq-row label { font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--text3); text-transform: uppercase; flex: 1; }
+.freq-val { font-family: var(--font-title); font-size: 14px; color: var(--gold); min-width: 52px; text-align: right; }
+.tog {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  opacity: .8;
+  transition: opacity .15s;
+}
+.tog:hover { opacity: 1; }
+.sub { display: none; margin-top: 8px; } .sub.open { display: block; }
+textarea.notes {
+  width: 100%;
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  resize: vertical;
+  min-height: 56px;
+  outline: none;
+}
+textarea.notes::placeholder { color: var(--text3); }
+textarea.notes:focus { border-color: var(--border2); }
+
+/* JUNK INFO */
+.junk-info {
+  background: var(--warning-bg);
+  border: 1px solid rgba(251,191,36,0.15);
+  border-radius: var(--radius-lg);
+  padding: .75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 12px;
+  color: var(--warning-text);
+  line-height: 1.6;
+}
+.junk-info strong { color: var(--gold); }
+
+/* DELOAD */
+.deload-banner {
+  background: var(--warning-bg);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: var(--radius-lg);
+  padding: .75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 12px;
+  color: var(--warning-text);
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.deload-banner.on { display: flex; }
+
+/* TIP */
+.tip {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-top: 1.5rem;
+}
+.tip p { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+/* MESO */
+.meso-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.meso-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+.meso-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.meso-name { font-family: var(--font-title); font-size: 15px; letter-spacing: 1px; color: var(--text); }
+.week-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.week-label { font-size: 10px; font-weight: 700; color: var(--text3); min-width: 52px; text-transform: uppercase; letter-spacing: .04em; }
+.week-inputs { display: flex; gap: 4px; flex: 1; }
+.week-inputs input { font-size: 12px; padding: 4px 6px; text-align: center; }
+.week-actual { background: var(--bg3) !important; }
+.week-cols { display: grid; grid-template-columns: 52px 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+.week-col-head { font-size: 9px; font-weight: 700; color: var(--text3); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+
+/* PROGRESSÃO */
+.ex-row { display: grid; grid-template-columns: 1fr 76px 58px 58px 30px; gap: 4px; align-items: center; margin-bottom: 6px; }
+.ex-row input { font-size: 12px; padding: 5px 6px; }
+.ex-add {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+}
+.ex-head { display: grid; grid-template-columns: 1fr 76px 58px 58px 30px; gap: 4px; margin-bottom: 6px; }
+.ex-head span { font-size: 9px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  letter-spacing: .04em;
+}
+footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <div>
+      <div class="logo-text">PERFORMANCE <span>INTELIGENTE</span></div>
+    </div>
+  </div>
+  <div class="header-sub">DIAGNÓSTICO INTELIGENTE · ESTRATÉGIA PRECISA · RESULTADOS REAIS</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="max-width:900px;margin:0 auto;">
+    <div>
+      <span class="hero-accent"></span>
+      <h1>CALCULADORA DE <span>VOLUME</span> DE TREINO</h1>
+    </div>
+    <p class="hero-desc">Descubra seu MEV, MAV, MRV e limiar de junk volume individual por grupo muscular</p>
+    <div class="hero-pills">
+      <span class="pill">MEV · MAV · MRV</span>
+      <span class="pill">Junk Volume</span>
+      <span class="pill">Mesociclo</span>
+      <span class="pill">Progressão de Cargas</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('calc')"><i class="ti ti-calculator"></i> Calculadora</button>
+    <button class="tab" onclick="showTab('meso')"><i class="ti ti-calendar"></i> Mesociclo</button>
+    <button class="tab" onclick="showTab('prog')"><i class="ti ti-trending-up"></i> Progressão</button>
+  </div>
+
+  <!-- TAB CALCULADORA -->
+  <div id="tab-calc" class="tab-pane active">
+
+    <p class="sec-title">Perfil do atleta</p>
+    <div class="grid3">
+      <div class="card">
+        <label for="exp">Nível de experiência</label>
+        <select id="exp" onchange="calc()">
+          <option value="iniciante">Iniciante (0–1 ano)</option>
+          <option value="intermediario" selected>Intermediário (1–3 anos)</option>
+          <option value="avancado">Avançado (3+ anos)</option>
+        </select>
+      </div>
+      <div class="card">
+        <label for="freq">Frequência semanal de treino</label>
+        <div class="row">
+          <input type="range" id="freq" min="2" max="6" value="4" step="1" oninput="document.getElementById('fo').textContent=this.value+'x'; calc()">
+          <span class="rval" id="fo">4x</span>
+        </div>
+      </div>
+      <div class="card">
+        <label for="sono">Qualidade do sono</label>
+        <select id="sono" onchange="calc()">
+          <option value="ruim">Ruim (menos de 6h)</option>
+          <option value="ok" selected>Ok (6–7h)</option>
+          <option value="bom">Bom (7–8h)</option>
+          <option value="otimo">Ótimo (8h+)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="junk-info">
+      <strong>Junk volume:</strong> séries acima do MRV onde não há mais adaptação — apenas acúmulo de fadiga, maior risco de lesão e comprometimento da recuperação. Mantenha-se sempre abaixo do seu MRV.
+    </div>
+
+    <div id="deload-banner" class="deload-banner">
+      <i class="ti ti-alert-triangle"></i>
+      <span id="deload-msg"></span>
+    </div>
+
+    <p class="sec-title">Resumo geral</p>
+    <div class="sum-grid" id="sum-grid"></div>
+
+    <hr class="divider">
+    <p class="sec-title">Volume por grupo muscular</p>
+    <div id="muscles-list"></div>
+
+    <hr class="divider">
+    <div class="card" style="margin-bottom:1.5rem;">
+      <label for="gnote">Anotações gerais — divisão de treino, observações, histórico</label>
+      <textarea class="notes" id="gnote" style="min-height:80px;" placeholder="Ex: Push/Pull/Legs — Seg: Peito+Tri / Qua: Costas+Bi / Sex: Pernas+Ombros..."></textarea>
+    </div>
+
+    <div class="tip"><p id="tip-text"></p></div>
+  </div>
+
+  <!-- TAB MESOCICLO -->
+  <div id="tab-meso" class="tab-pane">
+    <div class="grid3" style="margin-bottom:1rem;">
+      <div class="card">
+        <label for="meso-weeks">Duração do mesociclo</label>
+        <div class="row">
+          <input type="range" id="meso-weeks" min="3" max="8" value="4" step="1" oninput="document.getElementById('mwo').textContent=this.value+' sem'; buildMeso()">
+          <span class="rval" id="mwo">4 sem</span>
+        </div>
+      </div>
+      <div class="card">
+        <label for="cur-week">Semana atual</label>
+        <div class="row">
+          <input type="range" id="cur-week" min="1" max="8" value="1" step="1" oninput="document.getElementById('cwo').textContent='Sem '+this.value; checkDeload()">
+          <span class="rval" id="cwo">Sem 1</span>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.6;">Planeje o volume de cada semana e registre o realizado. A última semana é automaticamente o deload.</p>
+    <div class="meso-grid" id="meso-grid"></div>
+  </div>
+
+  <!-- TAB PROGRESSÃO -->
+  <div id="tab-prog" class="tab-pane">
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.6;">Registre seus exercícios, cargas e repetições por grupo muscular para acompanhar a progressão.</p>
+    <div id="prog-list"></div>
+  </div>
+
+  <footer>
+    <span>Performance Inteligente</span> · Diagnóstico Inteligente · Estratégia Precisa · Resultados Reais
+  </footer>
+</div>
+
+<script>
+const MUS=[
+  {id:"peito",name:"Peito",base:{mev:8,mav:16,mrv:22}},
+  {id:"costas",name:"Costas",base:{mev:10,mav:18,mrv:25}},
+  {id:"ombros",name:"Ombros",base:{mev:6,mav:14,mrv:20}},
+  {id:"biceps",name:"Bíceps",base:{mev:6,mav:14,mrv:20}},
+  {id:"triceps",name:"Tríceps",base:{mev:4,mav:12,mrv:18}},
+  {id:"quad",name:"Quadríceps",base:{mev:8,mav:16,mrv:22}},
+  {id:"post",name:"Posterior/Glúteos",base:{mev:6,mav:14,mrv:20}},
+  {id:"pant",name:"Panturrilha",base:{mev:8,mav:16,mrv:22}},
+  {id:"abd",name:"Abdômen",base:{mev:6,mav:14,mrv:20}}
+];
+const notes={};const mfreqs={};const exercises={};const mesoData={};
+MUS.forEach(m=>{notes[m.id]='';mfreqs[m.id]=2;exercises[m.id]=[];mesoData[m.id]={planned:[],actual:[]};});
+
+function showTab(t){
+  document.querySelectorAll('.tab,.tab-pane').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${t}')"]`).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='meso')buildMeso();
+  if(t==='prog')buildProg();
+}
+function getMult(){
+  const exp=document.getElementById('exp').value;
+  const freq=parseInt(document.getElementById('freq').value);
+  const sono=document.getElementById('sono').value;
+  const eM=exp==='iniciante'?0.85:exp==='intermediario'?1:1.25;
+  const fM=freq<=2?.8:freq<=3?.9:freq<=4?1:freq<=5?1.1:1.2;
+  const sM=sono==='ruim'?.8:sono==='ok'?.9:sono==='bom'?1:1.1;
+  return eM*fM*sM;
+}
+function getExpMevMult(){
+  const exp=document.getElementById('exp').value;
+  return exp==='iniciante'?1.15:exp==='intermediario'?1:0.9;
+}
+function bColor(p){return p<0.6?'#4ade80':p<0.85?'#fbbf24':'#f87171';}
+function sBadge(p){
+  if(p<0.6)return '<span class="badge bs">Dentro do MAV</span>';
+  if(p<0.85)return '<span class="badge bw">Próximo do MRV</span>';
+  if(p<1)return '<span class="badge bd">No limite!</span>';
+  return '<span class="badge bd">Junk volume!</span>';
+}
+function calc(preserve){
+  const mult=getMult();
+  const mevMult=getExpMevMult();
+  const list=document.getElementById('muscles-list');
+  if(!preserve)list.innerHTML='';
+  let tMev=0,tMav=0,tMrv=0,jCount=0;
+  const freq=parseInt(document.getElementById('freq').value);
+  MUS.forEach(m=>{
+    const mev=Math.round(m.base.mev*mult*mevMult);
+    const mav=Math.round(m.base.mav*mult);
+    const mrv=Math.round(m.base.mrv*mult);
+    const jv=mrv+Math.round(3*mult);
+    tMev+=mev;tMav+=mav;tMrv+=mrv;
+    const mf=mfreqs[m.id]||2;
+    const sps=Math.round(mav/mf);
+    const pct=Math.min((mf*3)/mrv,1.2);
+    if(pct>=1)jCount++;
+    if(!preserve){
+      const d=document.createElement('div');
+      d.className='mcard'+(pct>=1?' junk':'');
+      d.id='mc-'+m.id;
+      d.innerHTML=`
+        <div class="mhead"><div class="mname">${m.name}</div><div id="mbadge-${m.id}">${sBadge(pct)}</div></div>
+        <div class="freq-row">
+          <label for="mf-${m.id}">Frequência deste músculo</label>
+          <input type="range" id="mf-${m.id}" min="1" max="6" value="${mf}" step="1" style="flex:1;width:auto;" oninput="mfreqs['${m.id}']=parseInt(this.value);document.getElementById('mfo-${m.id}').textContent=this.value+'x/sem';calc(true)">
+          <span class="freq-val" id="mfo-${m.id}">${mf}x/sem</span>
+        </div>
+        <div class="mrow"><span class="ml">MEV — mínimo efetivo</span><span class="mv">${mev} séries/sem</span></div>
+        <div class="mrow"><span class="ml">MAV — máximo adaptativo</span><span class="mv">${mav} séries/sem</span></div>
+        <div class="mrow"><span class="ml">MRV — máximo recuperável</span><span class="mv">${mrv} séries/sem</span></div>
+        <div class="mrow"><span class="ml">Limiar de junk volume</span><span class="mv">${jv}+ séries/sem</span></div>
+        <div class="mrow"><span class="ml">Séries por sessão (MAV)</span><span class="mv" id="sps-${m.id}">${sps} séries/sessão</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-${m.id}" style="width:${Math.min(Math.round(pct*100),100)}%;background:${bColor(pct)};"></div></div>
+        <div class="bar-marks"><span>MEV ${mev}</span><span>MAV ${mav}</span><span>MRV ${mrv}</span></div>
+        <div class="jbox${pct>=1?' on':''}" id="jb-${m.id}"><i class="ti ti-alert-triangle"></i> Volume acima do MRV — séries extras viram junk volume.</div>
+        <button class="tog" onclick="togSub('ns-${m.id}',this)"><i class="ti ti-notes"></i> Anotações</button>
+        <div class="sub" id="ns-${m.id}">
+          <textarea class="notes" id="note-${m.id}" placeholder="Dor tardia, recuperação entre sessões, sensações no treino..." oninput="notes['${m.id}']=this.value">${notes[m.id]}</textarea>
+        </div>`;
+      list.appendChild(d);
+    } else {
+      const c=document.getElementById('mc-'+m.id);
+      if(c){
+        c.className='mcard'+(pct>=1?' junk':'');
+        document.getElementById('mbadge-'+m.id).innerHTML=sBadge(pct);
+        document.getElementById('bar-'+m.id).style.width=Math.min(Math.round(pct*100),100)+'%';
+        document.getElementById('bar-'+m.id).style.background=bColor(pct);
+        document.getElementById('jb-'+m.id).className='jbox'+(pct>=1?' on':'');
+        document.getElementById('sps-'+m.id).textContent=sps+' séries/sessão';
+      }
+    }
+  });
+  document.getElementById('sum-grid').innerHTML=`
+    <div class="sum-card"><div class="sum-label">MEV total</div><div class="sum-val">${tMev}</div><div class="sum-sub">séries/semana</div></div>
+    <div class="sum-card"><div class="sum-label">MAV total</div><div class="sum-val">${tMav}</div><div class="sum-sub">zona alvo</div></div>
+    <div class="sum-card"><div class="sum-label">MRV total</div><div class="sum-val">${tMrv}</div><div class="sum-sub">limite máximo</div></div>
+    <div class="sum-card"><div class="sum-label">Séries/treino</div><div class="sum-val">${Math.round(tMav/freq)}</div><div class="sum-sub">média MAV</div></div>
+    ${jCount>0?`<div class="sum-card" style="border-color:rgba(248,113,113,0.3);"><div class="sum-label" style="color:var(--danger-text)">Alertas junk</div><div class="sum-val" style="color:var(--danger-text)">${jCount}</div><div class="sum-sub" style="color:var(--danger-text)">músculo(s)</div></div>`:''}
+  `;
+  const exp=document.getElementById('exp').value;
+  const sono=document.getElementById('sono').value;
+  let tip='';
+  if(jCount>0)tip=`${jCount} grupo(s) muscular(es) no limiar do junk volume. Reduza o volume ou aumente o intervalo entre sessões.`;
+  else if(sono==='ruim')tip='Sono ruim reduz sua capacidade de recuperação em até 20%. Priorize o sono antes de adicionar mais séries.';
+  else if(exp==='iniciante')tip='Como iniciante, o MEV foi ajustado para cima considerando a curva de consciência corporal. Suba o volume gradualmente a cada mesociclo.';
+  else if(exp==='avancado')tip='Atletas avançados toleram volumes maiores, mas a recuperação é crítica. Aproxime-se do MRV apenas nas últimas semanas antes do deload.';
+  else tip='Mantenha-se na faixa MAV durante o mesociclo. Reserve o volume próximo ao MRV para as últimas semanas antes do deload.';
+  document.getElementById('tip-text').textContent=tip;
+  checkDeload();
+}
+function checkDeload(){
+  const weeks=parseInt(document.getElementById('meso-weeks')?document.getElementById('meso-weeks').value:4);
+  const cur=parseInt(document.getElementById('cur-week')?document.getElementById('cur-week').value:1);
+  const banner=document.getElementById('deload-banner');
+  const msg=document.getElementById('deload-msg');
+  if(!banner)return;
+  if(cur>=weeks){banner.className='deload-banner on';msg.textContent='Você está na semana final do mesociclo — hora de planejar o deload! Reduza o volume para 40–60% do MAV.';}
+  else if(cur===weeks-1){banner.className='deload-banner on';msg.textContent='Próxima semana é a última do mesociclo. Prepare-se para o deload em seguida.';}
+  else{banner.className='deload-banner';}
+}
+function togSub(id,btn){
+  const s=document.getElementById(id);
+  s.classList.toggle('open');
+  const open=s.classList.contains('open');
+  btn.innerHTML=open?'<i class="ti ti-chevron-up"></i> Ocultar':'<i class="ti ti-notes"></i> Anotações';
+}
+function buildMeso(){
+  const weeks=parseInt(document.getElementById('meso-weeks').value);
+  const mult=getMult();
+  const grid=document.getElementById('meso-grid');
+  grid.innerHTML='';
+  MUS.forEach(m=>{
+    const mav=Math.round(m.base.mav*mult);
+    const mrv=Math.round(m.base.mrv*mult);
+    if(!mesoData[m.id].planned.length){
+      mesoData[m.id].planned=Array.from({length:8},(_,i)=>Math.min(mav+i*2,mrv));
+      mesoData[m.id].actual=Array(8).fill('');
+    }
+    let rows='';
+    for(let w=0;w<weeks;w++){
+      const isDeload=w===weeks-1;
+      const planVal=isDeload?Math.round(mav*0.5):mesoData[m.id].planned[w]||mav;
+      const actVal=mesoData[m.id].actual[w]||'';
+      rows+=`<div class="week-row">
+        <span class="week-label" style="color:${isDeload?'var(--gold)':'var(--text3)'}">
+          ${isDeload?'Deload':'Sem '+(w+1)}
+        </span>
+        <div class="week-inputs">
+          <input type="number" value="${planVal}" min="0" max="60" title="Planejado" oninput="mesoData['${m.id}'].planned[${w}]=parseInt(this.value)||0">
+          <input type="number" class="week-actual" value="${actVal}" min="0" max="60" title="Realizado" placeholder="—" oninput="mesoData['${m.id}'].actual[${w}]=parseInt(this.value)||''">
+        </div>
+      </div>`;
+    }
+    const card=document.createElement('div');
+    card.className='meso-card';
+    card.innerHTML=`
+      <div class="meso-head"><span class="meso-name">${m.name}</span><span class="badge bi">MAV ${mav} · MRV ${mrv}</span></div>
+      <div class="week-cols"><span class="week-col-head"></span><span class="week-col-head">Planejado</span><span class="week-col-head">Realizado</span></div>
+      ${rows}`;
+    grid.appendChild(card);
+  });
+}
+function buildProg(){
+  const list=document.getElementById('prog-list');
+  list.innerHTML='';
+  MUS.forEach(m=>{
+    const card=document.createElement('div');
+    card.className='mcard';
+    card.style.marginBottom='10px';
+    let exRows=exercises[m.id].map((ex,i)=>`
+      <div class="ex-row">
+        <input type="text" value="${ex.name}" placeholder="Exercício" oninput="exercises['${m.id}'][${i}].name=this.value">
+        <input type="number" value="${ex.carga}" placeholder="Carga kg" oninput="exercises['${m.id}'][${i}].carga=this.value">
+        <input type="number" value="${ex.reps}" placeholder="Reps" oninput="exercises['${m.id}'][${i}].reps=this.value">
+        <input type="number" value="${ex.series}" placeholder="Séries" oninput="exercises['${m.id}'][${i}].series=this.value">
+        <button onclick="rmEx('${m.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0;"><i class="ti ti-trash"></i></button>
+      </div>`).join('');
+    card.innerHTML=`
+      <div class="mhead"><div class="mname">${m.name}</div></div>
+      <div class="ex-head"><span>Exercício</span><span>Carga (kg)</span><span>Reps</span><span>Séries</span><span></span></div>
+      <div id="exlist-${m.id}">${exRows}</div>
+      <button class="ex-add" onclick="addEx('${m.id}')"><i class="ti ti-plus"></i> Adicionar exercício</button>`;
+    list.appendChild(card);
+  });
+}
+function addEx(mid){exercises[mid].push({name:'',carga:'',reps:'',series:''});buildProg();}
+function rmEx(mid,i){exercises[mid].splice(i,1);buildProg();}
+calc();
+</script>
+</body>
+</html>
